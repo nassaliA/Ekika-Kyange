@@ -1,0 +1,188 @@
+
+<h2 class="sr-only">BUYEF interactive totem explorer — tap a clan totem to learn its conservation role</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.hdr{background:#003087;border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+.hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.hdr-logo{width:40px;height:40px;border-radius:50%;background:#fff;border:2px solid #f5c518;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-logo i{font-size:20px;color:#003087}
+.hdr-title{font-size:16px;font-weight:500;color:#fff;line-height:1.3}
+.hdr-sub{font-size:12px;color:#ffe066;line-height:1.5}
+.hdr-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.hdr-stat{background:rgba(255,255,255,0.1);border-radius:var(--border-radius-md);padding:6px 8px;text-align:center}
+.hdr-stat-num{font-size:18px;font-weight:500;color:#f5c518}
+.hdr-stat-lbl{font-size:10px;color:rgba(255,255,255,0.7);margin-top:1px}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.f-btn{font-size:11px;padding:5px 10px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.f-btn.on{background:#003087;color:#fff;border-color:#003087}
+.progress-bar{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 12px;margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.prog-track{flex:1;height:6px;background:var(--color-border-tertiary);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:#f5c518;border-radius:3px;transition:width .4s}
+.prog-lbl{font-size:12px;color:var(--color-text-secondary);white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:1rem}
+.totem-btn{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 10px;cursor:pointer;text-align:center;transition:border-color .15s;position:relative}
+.totem-btn:hover{border-color:var(--color-border-primary)}
+.totem-btn.seen{border-left:3px solid #f5c518;border-radius:0 var(--border-radius-lg) var(--border-radius-lg) 0}
+.totem-btn.active{border:2px solid #003087}
+.totem-icon{font-size:28px;display:block;margin-bottom:6px;line-height:1}
+.totem-clan{font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:1.2}
+.totem-species{font-size:11px;color:var(--color-text-secondary);margin-top:2px;font-style:italic}
+.type-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;margin-top:5px}
+.detail-panel{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+.detail-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.detail-icon-wrap{width:56px;height:56px;border-radius:var(--border-radius-lg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:32px}
+.detail-clan{font-size:17px;font-weight:500;color:var(--color-text-primary)}
+.detail-species{font-size:13px;color:var(--color-text-secondary);margin-top:2px;font-style:italic}
+.detail-role{font-size:13px;color:var(--color-text-secondary);line-height:1.7;border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;margin-bottom:10px}
+.detail-habitat{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary);margin-bottom:8px}
+.detail-habitat i{font-size:15px}
+.detail-actions{display:flex;gap:8px}
+.detail-actions button{flex:1;font-size:12px;padding:7px}
+.empty{text-align:center;padding:2rem 1rem;color:var(--color-text-secondary);font-size:13px}
+.seen-check{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:#f5c518;display:flex;align-items:center;justify-content:center}
+.seen-check i{font-size:11px;color:#003087}
+</style>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-logo"><i class="ti ti-leaf" aria-hidden="true"></i></div>
+    <div>
+      <div class="hdr-title">Ebika bya Buganda</div>
+      <div class="hdr-sub">BUYEF Totem Explorer — tap a clan to learn more</div>
+    </div>
+  </div>
+  <div class="hdr-stats">
+    <div class="hdr-stat"><div class="hdr-stat-num">50</div><div class="hdr-stat-lbl">Clans</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-num">100+</div><div class="hdr-stat-lbl">Species</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-num">800+</div><div class="hdr-stat-lbl">Years</div></div>
+  </div>
+</div>
+
+<div class="filter-row" id="filterRow"></div>
+
+<div class="progress-bar">
+  <i class="ti ti-eye" aria-hidden="true" style="font-size:15px;color:var(--color-text-secondary)"></i>
+  <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <span class="prog-lbl" id="progLbl">0 explored</span>
+</div>
+
+<div id="detailPanel"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+const totems=[
+  {clan:"Ffumbe",species:"African Civet",icon:"ti-cat",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"The civet is a nocturnal predator and seed disperser. Its cultural protection maintains forest regeneration and controls rodent populations across Buganda's forests.",habitat:"Forest edges and woodlands"},
+  {clan:"Lugave",species:"Pangolin",icon:"ti-fish",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Pangolins are the world's most trafficked mammals. This clan's taboo gives them critical protection — pangolins consume millions of ants and termites annually, keeping insect populations in balance.",habitat:"Savanna and forest floors"},
+  {clan:"Ngeye",species:"Colobus Monkey",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Colobus monkeys are key seed dispersers for forest trees. Protecting them sustains Uganda's forest biodiversity and the health of the forest canopy.",habitat:"Tropical rainforests"},
+  {clan:"Mmamba",species:"Lungfish",icon:"ti-ripple",type:"fish",typeLbl:"Fish / aquatic",typeColor:"#E1F5EE",typeTxt:"#085041",bg:"#E1F5EE",role:"The African lungfish is a living fossil and an indicator of water quality. Protecting it preserves wetland health and aquatic biodiversity in Lake Victoria.",habitat:"Lake Victoria and river systems"},
+  {clan:"Mbogo",species:"Buffalo",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Buffaloes are keystone grazers that shape savanna ecosystems, maintaining grass diversity and creating habitat for smaller species.",habitat:"Savanna grasslands"},
+  {clan:"Njovu",species:"Elephant",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Elephants are mega-gardeners — they disperse seeds, dig waterholes used by other wildlife, and create clearings that increase plant diversity across Uganda's landscapes.",habitat:"Forests, savanna and wetlands"},
+  {clan:"Ngo",species:"Leopard",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"As apex predators, leopards regulate prey populations to prevent overgrazing. Their protection maintains healthy trophic cascades throughout the ecosystem.",habitat:"Forest and savanna edges"},
+  {clan:"Mpologoma",species:"Lion",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Lions are keystone predators whose presence structures entire ecosystems. Their protection prevents collapse of the prey-predator balance across Uganda's national parks.",habitat:"Open savanna and grasslands"},
+  {clan:"Ngabi",species:"Bushbuck",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Bushbucks browse on understory vegetation, maintaining plant species diversity in forest edges and riparian zones around Lake Victoria.",habitat:"Forest margins and riverbanks"},
+  {clan:"Njaza",species:"Reedbuck",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Reedbucks inhabit wetland margins. Their protection helps preserve Uganda's fragile papyrus and marsh ecosystems, which are critical for water filtration and flood control.",habitat:"Wetlands and papyrus swamps"},
+  {clan:"Njobe",species:"Sitatunga",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Sitatunga are specially adapted to swampy habitats. Protecting them conserves Uganda's wetlands, which are crucial for water filtration, flood control and fish nurseries.",habitat:"Swamps and papyrus marshes"},
+  {clan:"Mpeewo",species:"Oribi",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Oribis are small antelopes of open grasslands. Their protection helps conserve Uganda's diminishing grassland and savanna habitats which support hundreds of other species.",habitat:"Open grasslands and savannas"},
+  {clan:"Ntalaganya",species:"Duiker",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Duikers are forest-floor browsers and important seed dispersers. They play a vital role in maintaining the understory layer of Uganda's tropical forests.",habitat:"Tropical forest floors"},
+  {clan:"Ngaali",species:"Grey Crowned Crane",icon:"ti-feather",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Uganda's national bird. Crested cranes are endangered wetland indicators. Clan taboos protect this iconic species and its papyrus swamp habitat along Lake Victoria.",habitat:"Wetlands and open grasslands"},
+  {clan:"Nnamugoona",species:"Crow",icon:"ti-feather",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Crows are highly intelligent scavengers essential to nutrient cycling. Protecting them maintains ecological balance across human-wildlife landscapes in Buganda.",habitat:"Human settlements and forests"},
+  {clan:"Nyonyi Nyange",species:"Cattle Egret",icon:"ti-feather",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Egrets control insect and pest populations in agricultural lands and wetlands, providing natural pest management services that support farming communities.",habitat:"Wetlands and agricultural land"},
+  {clan:"Nkima",species:"Vervet Monkey",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Vervet monkeys are prolific seed dispersers. Protecting them sustains forest regeneration across Buganda's central region and garden landscapes.",habitat:"Forest edges and gardens"},
+  {clan:"Nvubu",species:"Hippopotamus",icon:"ti-ripple",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Hippos fertilise rivers and lakes with their dung, supporting entire aquatic food chains. Their cultural protection helps preserve the productivity of Uganda's water bodies.",habitat:"Rivers, lakes and wetlands"},
+  {clan:"Nswaswa",species:"Monitor Lizard",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Monitor lizards are important scavengers and predators of eggs and small animals. They control pest populations and clean up carcasses, maintaining ecosystem health.",habitat:"Forests, savanna and lakeshores"},
+  {clan:"Ngonge",species:"Otter",icon:"ti-ripple",type:"fish",typeLbl:"Fish / aquatic",typeColor:"#E1F5EE",typeTxt:"#085041",bg:"#E1F5EE",role:"Otters are aquatic predators that indicate healthy river ecosystems. Protecting them safeguards fish populations and the health of Uganda's riverine habitats.",habitat:"Rivers and lake margins"},
+  {clan:"Nkejje",species:"Sprat (small fish)",icon:"ti-ripple",type:"fish",typeLbl:"Fish / aquatic",typeColor:"#E1F5EE",typeTxt:"#085041",bg:"#E1F5EE",role:"Sprats form the base of the food web in Lake Victoria. Protecting them is essential for the survival of larger fish species and the fishing communities that depend on them.",habitat:"Lake Victoria open waters"},
+  {clan:"Nsuma",species:"Nsuma fish",icon:"ti-ripple",type:"fish",typeLbl:"Fish / aquatic",typeColor:"#E1F5EE",typeTxt:"#085041",bg:"#E1F5EE",role:"This freshwater fish is an important part of the Lake Victoria ecosystem. Its protection helps maintain aquatic biodiversity in one of Africa's largest lakes.",habitat:"Lake Victoria and rivers"},
+  {clan:"Nvuma",species:"Aquatic plant",icon:"ti-plant",type:"plant",typeLbl:"Plant",typeColor:"#EAF3DE",typeTxt:"#27500A",bg:"#EAF3DE",role:"Aquatic plants oxygenate water bodies, provide habitat for fish and invertebrates, and are critical to the health of Lake Victoria's ecosystem and the communities it supports.",habitat:"Lake Victoria and wetlands"},
+  {clan:"Nseenene",species:"Grasshopper",icon:"ti-bug",type:"insect",typeLbl:"Insect",typeColor:"#FAEEDA",typeTxt:"#633806",bg:"#FAEEDA",role:"Nsenene are a seasonal delicacy but this clan's taboo prevents over-harvesting, helping maintain grasshopper populations that form a vital part of bird food chains across Uganda.",habitat:"Grasslands and agricultural areas"},
+  {clan:"Kinyomo",species:"Black Ant",icon:"ti-bug",type:"insect",typeLbl:"Insect",typeColor:"#FAEEDA",typeTxt:"#633806",bg:"#FAEEDA",role:"Ants are ecosystem engineers — they aerate soil, disperse seeds, and decompose organic matter. This clan's taboo protects a critical insect group that sustains soil health.",habitat:"Forests, gardens and grasslands"},
+  {clan:"Kkobe",species:"Kkobe creeping plant",icon:"ti-plant",type:"plant",typeLbl:"Plant",typeColor:"#EAF3DE",typeTxt:"#27500A",bg:"#EAF3DE",role:"This edible creeping plant is both a food crop and a wild plant. Protecting it preserves traditional food systems and prevents loss of indigenous plant varieties in Buganda.",habitat:"Forest floors and garden edges"},
+  {clan:"Nkula",species:"Rhinoceros",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Though rhinos are locally extinct, this clan preserves cultural memory of rhinos, supporting advocacy for their reintroduction and conservation across East Africa.",habitat:"Historically: savanna and forest"},
+  {clan:"Musu",species:"Cane Rat",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Cane rats are herbivores that influence grass and reed vegetation. Their cultural protection prevents local extinction from overhunting for bushmeat in peri-urban areas.",habitat:"Wetland margins and grasslands"},
+  {clan:"Mbuzi",species:"Goat",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"The goat clan discourages overexploitation of goats, encouraging sustainable herding practices and preventing land degradation from overgrazing around Buganda's settlements.",habitat:"Farms and settlements"},
+  {clan:"Nte",species:"Cow",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"The domesticated cow as totem represents the bond between livestock and livelihoods, encouraging sustainable pastoralism and deep respect for animal welfare.",habitat:"Pastoral farmlands"},
+  {clan:"Ndiga",species:"Sheep",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Members cannot eat sheep or their products. This cultural rule encourages sustainable livestock management and prevents overexploitation of domesticated animals.",habitat:"Farms and rural settlements"},
+  {clan:"Mazzi ga Kisasi",species:"Sacred water",icon:"ti-droplet",type:"symbolic",typeLbl:"Symbolic",typeColor:"#EEEDFE",typeTxt:"#3C3489",bg:"#EEEDFE",role:"This totem venerates water bodies, promoting conservation of springs, swamps, and rivers. It embeds the protection of Uganda's critical freshwater resources into cultural identity.",habitat:"Springs, rivers and wetlands"},
+  {clan:"Mutima",species:"The heart",icon:"ti-heart",type:"symbolic",typeLbl:"Symbolic",typeColor:"#EEEDFE",typeTxt:"#3C3489",bg:"#EEEDFE",role:"This symbolic totem builds reverence for life itself, fostering a cultural philosophy that all living things — including every plant and animal — deserve care and protection.",habitat:"Universal — all of nature"},
+  {clan:"Nkerebwe",species:"Squirrel",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Squirrels are important seed dispersers and nut cachers. Protecting them contributes to forest tree regeneration across Buganda's landscapes and garden ecosystems.",habitat:"Forest edges and woodlands"},
+  {clan:"Nsunu",species:"Warthog",icon:"ti-paw",type:"animal",typeLbl:"Animal",typeColor:"#E6F1FB",typeTxt:"#0C447C",bg:"#E6F1FB",role:"Warthogs till the soil as they forage, aerating the ground and creating micro-habitats for insects and plants. Protecting them sustains grassland ecosystem processes.",habitat:"Open savanna and grasslands"},
+  {clan:"Abalangira",species:"Royal clan",icon:"ti-crown",type:"symbolic",typeLbl:"Symbolic",typeColor:"#EEEDFE",typeTxt:"#3C3489",bg:"#EEEDFE",role:"The royal clan holds no single totem but is custodian of the entire kingdom's conservation tradition. The Kabaka's authority underpins all totemic law across all 50 clans.",habitat:"All of Buganda"},
+];
+
+const types=["all","animal","fish","plant","insect","symbolic"];
+const typeLabels={"all":"All clans","animal":"Animals","fish":"Fish & aquatic","plant":"Plants","insect":"Insects","symbolic":"Symbolic"};
+let activeType="all";
+let activeIdx=null;
+let seen=new Set();
+
+function renderFilters(){
+  const row=document.getElementById("filterRow");
+  row.innerHTML=types.map(t=>`<button class="f-btn${activeType===t?" on":""}" onclick="setType('${t}')">${typeLabels[t]}</button>`).join("");
+}
+
+function setType(t){activeType=t;activeIdx=null;renderFilters();renderGrid();renderDetail();}
+
+function filtered(){return activeType==="all"?totems:totems.filter(c=>c.type===activeType);}
+
+function renderGrid(){
+  const list=filtered();
+  const grid=document.getElementById("grid");
+  if(!list.length){grid.innerHTML=`<div class="empty" style="grid-column:span 2">No clans in this category</div>`;return;}
+  grid.innerHTML=list.map((c,i)=>{
+    const realIdx=totems.indexOf(c);
+    const isSeen=seen.has(realIdx);
+    const isActive=activeIdx===realIdx;
+    return `<button class="totem-btn${isSeen?" seen":""}${isActive?" active":""}" onclick="selectTotem(${realIdx})" aria-label="Learn about ${c.clan} clan, totem: ${c.species}">
+      ${isSeen?`<span class="seen-check"><i class="ti ti-check" aria-hidden="true"></i></span>`:""}
+      <i class="ti ${c.icon}" aria-hidden="true" style="font-size:28px;color:${c.typeTxt};display:block;margin-bottom:6px"></i>
+      <div class="totem-clan">${c.clan}</div>
+      <div class="totem-species">${c.species}</div>
+      <span class="type-badge" style="background:${c.typeColor};color:${c.typeTxt}">${c.typeLbl}</span>
+    </button>`;
+  }).join("");
+}
+
+function renderDetail(){
+  const panel=document.getElementById("detailPanel");
+  if(activeIdx===null){panel.innerHTML="";return;}
+  const c=totems[activeIdx];
+  panel.innerHTML=`<div class="detail-panel">
+    <div class="detail-top">
+      <div class="detail-icon-wrap" style="background:${c.bg}">
+        <i class="ti ${c.icon}" aria-hidden="true" style="font-size:28px;color:${c.typeTxt}"></i>
+      </div>
+      <div>
+        <div class="detail-clan">${c.clan} clan</div>
+        <div class="detail-species">${c.species}</div>
+        <span class="type-badge" style="background:${c.typeColor};color:${c.typeTxt};margin-top:4px;display:inline-block">${c.typeLbl}</span>
+      </div>
+    </div>
+    <div class="detail-habitat"><i class="ti ti-map-pin" aria-hidden="true"></i><span>${c.habitat}</span></div>
+    <div class="detail-role">${c.role}</div>
+    <div class="detail-actions">
+      <button onclick="sendPrompt('Tell me more about the ${c.clan} clan totem — the ${c.species} — and how BUYEF youth can help protect it')">Learn more ↗</button>
+      <button onclick="closeDetail()">Close</button>
+    </div>
+  </div>`;
+}
+
+function selectTotem(idx){
+  activeIdx=idx;
+  seen.add(idx);
+  renderGrid();
+  renderDetail();
+  updateProgress();
+}
+
+function closeDetail(){activeIdx=null;renderGrid();renderDetail();}
+
+function updateProgress(){
+  const pct=Math.round((seen.size/totems.length)*100);
+  document.getElementById("progFill").style.width=pct+"%";
+  document.getElementById("progLbl").textContent=seen.size+" of "+totems.length+" explored";
+}
+
+renderFilters();
+renderGrid();
+updateProgress();
+</script>
